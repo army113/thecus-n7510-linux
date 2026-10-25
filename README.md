@@ -50,6 +50,34 @@ LCD menu actions start in **dry-run** mode (choices are only logged). Enable
 them with `sudo touch /etc/n7510/lcd-actions-enabled && sudo systemctl restart n7510-lcd`.
 The default LCD password is `0000`.
 
+## Status and limitations
+
+Version 0.1.0. Built and tested on **one** N7510 (board ID 6, LCD MCU
+firmware `01.04.00`) running openmediavault 6 / Debian 11, kernel 6.0.
+
+| Area | Status |
+|---|---|
+| Fans, LCD pages, password entry, fan-mode menu, change password, reboot from the panel | tested |
+| Power off from the panel | implemented, not tested |
+| Tray LEDs (red/green), System "!" red + beeps, USB LED | tested |
+| System "!" orange during RAID resync/check | implemented, not seen live |
+| eSATA LED | not controllable from software as far as we can tell; probably lit by the eSATA controller itself (unconfirmed, no eSATA device to test) |
+| USB Copy on the panel | answered with "USB Copy N/A"; copying is not implemented |
+| Other Thecus models | untested; the pin map may differ |
+
+Known limitations:
+
+- The green LEDs of trays 1–5 need either the kernel's `gpio_ich` driver
+  (with `acpi_enforce_resources=lax`) or `/dev/port`. Kernel lockdown, as
+  enabled by Secure Boot on many distributions, blocks `/dev/port`; without
+  `gpio_ich` those five LEDs then stay dark. Everything else is unaffected.
+- The default LCD password is `0000`. Change it from the panel menu.
+- Disks are matched to trays by serial number on first start
+  (`/etc/n7510/tray-map.json`). After moving disks between trays, delete that
+  file and restart `n7510-leds`.
+- The LED daemon samples disk activity 20 times a second, about 3 % of one
+  Atom thread.
+
 ## Safety
 
 - **PCA9532 `0x62` pin 7 hard-resets the whole board.** The daemons only ever

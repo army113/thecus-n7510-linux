@@ -195,8 +195,12 @@ def handle_setcfg(body, current):
         desc = f"{name}: item {arg}"
     else:
         arg = [cstr(body[0x19:0x19 + 21]), cstr(body[0x44:0x44 + 21])]
-        desc = f"{name}: values {['*' * len(v) for v in arg] if kind == 'edit' and 'Passwd' in name else arg}"
-    log(f"SETCFG {desc} raw={body.hex(' ')}")
+        secret = "Passwd" in name
+        desc = f"{name}: values {['*' * len(v) for v in arg] if secret else arg}"
+    # Entered digits are masked, so the log shows the frame layout but never a password.
+    raw = " ".join("**" if secret and 0x30 <= b <= 0x39 else f"{b:02x}"
+                   for b in body) if kind == "edit" else body.hex(" ")
+    log(f"SETCFG {desc} len={len(body)} raw={raw}")
     if not ACTIONS_ENABLED:
         log("dry-run: action not executed")
         return

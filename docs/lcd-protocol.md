@@ -114,10 +114,14 @@ The reply body goes into the static buffer 0x60fa00, which is never cleared. **Z
 - The MCU asks for the password (`1c`) at start-up and on entering the menu,
   and checks the entered digits itself (T).
 - The MCU requests GETSYSINFO again for every page it shows (~7 s) (T).
+- SETCFG for an edit menu echoes the form: `17 01 <nfields> label[21]
+  type(1) value[21] …`, so the first value starts at body+0x19 (T, one-field
+  password form, 46 bytes). The MCU then uses the new password itself once
+  the host serves it in the next `1c` reply (T).
 
 ## Open questions
 1. Does the MCU need `14` heartbeats at all? Sending one every 20 s is harmless.
-2. The edit-menu SETCFG layout (values at body+0x19 / +0x44) is read from the
-   disassembly, not yet confirmed live.
+2. Two-field edit forms (WAN/LAN IP and netmask, second value at body+0x44)
+   are read from the disassembly; this project does not use them.
 3. The meaning of SETBTO (`13`), SETEXCFG (`31`) and `10` is inferred.
 4. The sysinfo page rotation rules (0x60e7d0, curidx) are not fully decoded.
