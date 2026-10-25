@@ -1,0 +1,11 @@
+[Unit]
+Description=Thecus N7510 fan control (IT8728F, disk-temperature curve)
+After=systemd-modules-load.service
+
+[Service]
+ExecStart=/usr/bin/python3 /opt/n7510/n7510-fan.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

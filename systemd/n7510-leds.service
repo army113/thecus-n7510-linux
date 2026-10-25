@@ -1,0 +1,11 @@
+[Unit]
+Description=Thecus N7510 front-panel LEDs and alarm beeper
+After=mdmonitor.service systemd-modules-load.service
+
+[Service]
+ExecStart=/usr/bin/python3 /opt/n7510/n7510-leds.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

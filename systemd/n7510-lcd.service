@@ -1,0 +1,14 @@
+[Unit]
+Description=Thecus N7510 front-panel LCD (ATmega168 on ttyS0)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+# Interfaces shown on the WAN / LAN pages (rear ports, PCI 01:00.0 and 02:00.0).
+Environment=N7510_WAN=enp1s0 N7510_LAN=enp2s0
+ExecStart=/usr/bin/python3 /opt/n7510/n7510-lcd.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
