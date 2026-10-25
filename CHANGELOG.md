@@ -6,7 +6,8 @@
   it instead of openmediavault's `softdog`.
 - Tested on openmediavault 8 / Debian 13 (kernels 6.12 and 7.2): `install.sh`
   unchanged, all three services start; Debian 13 has no `gpio_ich`, so
-  `n7510-leds` drives the green LEDs through `/dev/port`.
+  `n7510-leds` drives the green LEDs through `/dev/port` (verified: a
+  per-tray read test lit each tray in turn).
 
 ## 0.1.3 (2026-10-25)
 
