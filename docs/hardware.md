@@ -37,9 +37,11 @@ warm (~40 °C) and is excluded from the fan curve.
 
 ## Trays
 
-Trays are numbered 1–7 from the top (the end next to the LCD) with the unit
-standing upright. Each tray has two LEDs: an upper white one (hardware) and a
-lower two-colour one.
+With the unit standing upright, trays are numbered 1–7 from the top; tray 7
+is the bottom one, just above the LCD. Each tray has two LEDs at its left end:
+an upper white one (hardware) and a lower two-colour one.
+
+![Thecus N7510 front with trays 1-7 numbered](images/n7510-front.jpg)
 
 | Tray | Port | Red LED | Green LED |
 |---|---|---|---|

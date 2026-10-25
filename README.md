@@ -4,6 +4,12 @@ Front-panel LCD, buttons, fans, LEDs and beeper for the **Thecus N7510**
 (7-bay, Intel Atom D2701, "Granite Well" board) running any current Linux
 distribution instead of the end-of-life Thecus OS.
 
+<img src="docs/images/n7510-front.jpg" alt="Thecus N7510 front panel with trays 1 to 7 numbered and the LCD showing RAID md0 clean" width="360" align="right">
+
+The status LEDs run down the left edge: power, System "!", LAN1, LAN2, USB,
+eSATA. Trays are numbered 1–7 from the top; the LCD and its four buttons sit
+at the bottom.
+
 Thecus stopped updating these boxes years ago. The hardware is a plain x86 PC,
 so it runs Debian, openmediavault, Ubuntu, Fedora and others fine, but out of
 the box the LCD sits on its boot animation, the buttons do nothing, the fans
@@ -59,7 +65,7 @@ firmware `01.04.00`) running openmediavault 6 / Debian 11, kernel 6.0.
 |---|---|
 | Fans, LCD pages, password entry, fan-mode menu, change password, reboot from the panel | tested |
 | Power off from the panel | implemented, not tested |
-| Tray LEDs (red/green), System "!" red + beeps, USB LED | tested |
+| Tray LEDs (red/green), System "!" red + beeps, USB LED | tested, including a real disk dropping out of a tray |
 | System "!" orange during RAID resync/check | implemented, not seen live |
 | eSATA LED | not controllable from software as far as we can tell; probably lit by the eSATA controller itself (unconfirmed, no eSATA device to test) |
 | USB Copy on the panel | answered with "USB Copy N/A"; copying is not implemented |
