@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Documented the ICH10 hardware watchdog (`iTCO_wdt`, tested) and how to use
+  it instead of openmediavault's `softdog`.
+
 ## 0.1.3 (2026-10-25)
 
 - Tested: scheduled power-on with `rtcwake` from power-off.

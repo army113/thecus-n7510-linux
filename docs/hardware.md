@@ -125,6 +125,15 @@ With the hook in place:
   power-off; the board started on time. The BIOS's *Advanced → Power
   Management → Resume by Alarm* (a fixed BIOS wake time) can stay Disabled.
 
+- **Hardware watchdog:** the ICH10 TCO watchdog (`iTCO_wdt`) works; the BIOS
+  does not lock it. An unfed `/dev/watchdog` hard-resets the board after
+  about 30 s. Let systemd feed it with `RuntimeWatchdogSec=60s`. On
+  openmediavault, which loads `softdog` by default, set
+  `OMV_WATCHDOG_MODULE_NAME="iTCO_wdt"` and
+  `OMV_WATCHDOG_SYSTEMD_RUNTIMEWATCHDOGSEC="60s"` in
+  `/etc/default/openmediavault`, run `omv-salt stage run prepare` and
+  `omv-salt deploy run watchdog`, and reboot.
+
 ## BIOS
 
 Phoenix SecureCore Tiano `CDV_T30 X64`, built 2012-09-17. Settings seen on
