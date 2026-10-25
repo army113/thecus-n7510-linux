@@ -108,6 +108,28 @@ right before power-off; the kernel's own sequence (flushing disk caches, then
 S5) then switches the board off. Verified on the N7510; reboot and halt are
 not affected. `tools/acpi-s5-info.py` shows these values read-only.
 
+With the hook in place:
+
+- **Power button:** the ACPI power button reaches systemd-logind; a short
+  press shuts down and powers off when `HandlePowerKey=poweroff` (the systemd
+  default; openmediavault defaults to *Standby*, i.e. suspend, which is
+  untested on this BIOS).
+- **Wake-on-LAN:** works from power-off on the WAN/LAN1 port (82574L,
+  `Supports Wake-on: pumbg`) with magic-packet mode (`wol g`). Thecus OS set
+  the same with `ethtool -s eth0 wol g`.
+- **Power after AC loss:** a BIOS setting only; Thecus OS does not control it
+  on this model (`sys_ac` exits because `eup=0`).
+- **Scheduled power-on:** Thecus used an RTC wake alarm; the kernel reports
+  `RTC can wake from S4`. Untested with `rtcwake`.
+
+## Thecus fan logic, for reference
+
+Thecus OS (`check_fan_lan.sh`) ran both fans from the hottest IT8728 board
+sensor in four steps: 255 above 60 °C, 204 at 51–60, 178 at 41–50, 153 at
+26–40, and 0 (off) at 25 °C or below; a fan reading 0 RPM above 25 °C counted
+as failed and beeped. `n7510-fan` instead follows the disks (quieter at normal
+temperatures) and keeps Thecus's 60 °C board limit as an alarm.
+
 ## openmediavault notes
 
 - folder2ram mounts `/var/log` after journald starts, so the journal silently

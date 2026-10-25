@@ -21,10 +21,10 @@ standard library and mainline kernel drivers.
 |---|---|---|
 | Front LCD | stuck on the boot animation | pages: hostname, WAN/LAN IP, RAID state |
 | Buttons and menu | dead | password-protected menu: fan mode, reboot, power off, change password |
-| Fans | fixed BIOS speeds, PWM disabled | follow the hottest disk; full speed on any fault |
+| Fans | fixed BIOS speeds, PWM disabled | follow the hottest disk; full speed on overheating or any fault |
 | Tray LEDs (red) | off | lit while that tray's disk is missing or out of sync |
 | Tray LEDs (green) | only trays 6–7 | all seven blink on disk activity |
-| System "!" LED | off | red on a fault (plus three beeps), orange during RAID resync |
+| System "!" LED | off | red on a fault or overheating (plus three beeps), orange during RAID resync |
 | USB LED | off | on while a USB storage device is attached |
 
 Tested on openmediavault 6 (Debian 11, kernel 6.0). The code avoids
@@ -59,13 +59,17 @@ The default LCD password is `0000`.
 
 ## Status and limitations
 
-Version 0.1.1. Built and tested on **one** N7510 (board ID 6, LCD MCU
+Version 0.1.2. Built and tested on **one** N7510 (board ID 6, LCD MCU
 firmware `01.04.00`) running openmediavault 6 / Debian 11, kernel 6.0.
 
 | Area | Status |
 |---|---|
 | Fans, LCD pages, password entry, fan-mode menu, change password, reboot and power off from the panel | tested |
 | Power off actually cutting power (`n7510-poweroff` hook, see below) | tested |
+| Power button (short press: clean shutdown and power off) | tested; on openmediavault set *System → Power Management → Power button* to **Shutdown** (its default, Standby, suspends) |
+| Wake-on-LAN from power-off | tested (magic packet; enable with `ethtool -s <nic> wol g`, OMV's interface setting, or systemd `WakeOnLan=magic`) |
+| Scheduled power-on (RTC wake alarm, `rtcwake`) | not tested |
+| Overheat alarm (board sensors ≥ 60 °C, CPU ≥ 70 °C, disk ≥ 50 °C: full fans, red "!", beeps) | logic tested, not triggered by real heat |
 | Tray LEDs (red/green), System "!" red + beeps, USB LED | tested, including a real disk dropping out of a tray |
 | System "!" orange during RAID resync/check | tested (RAID check) |
 | eSATA LED | not controllable from software as far as we can tell; probably lit by the eSATA controller itself (unconfirmed, no eSATA device to test) |

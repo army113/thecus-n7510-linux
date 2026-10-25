@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.2 (2026-10-25)
+
+- `n7510-fan`: overheat alarm. Full speed and status `hot` (red System "!"
+  and beeps via `n7510-leds`) when an IT8728 board sensor reaches 60 °C (the
+  Thecus OS limit), the CPU 70 °C, or any disk 50 °C.
+- Tested: the power button (clean shutdown and power off) and Wake-on-LAN
+  from power-off. Documented openmediavault's power-button default (Standby)
+  and the Thecus fan logic for reference.
+
 ## 0.1.1 (2026-10-25)
 
 - Power off now switches the board off. New systemd `system-shutdown` hook

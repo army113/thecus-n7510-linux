@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
-"""Fan control for the Thecus N7510 (IT8728F) under openmediavault.
+"""Fan control for the Thecus N7510 (IT8728F).
 
 Needs it87 loaded with fix_pwm_polarity=1 (the Thecus firmware sets the same
 active-high polarity) and drivetemp for disk temperatures.
 pwm1 drives fan1 and pwm3 drives fan3; pwm2 is not connected (mapped on a live N7510).
 
-Speed follows the hottest RAID member disk; CPU temperature overrides to full.
-Any read error, a stalled fan, or stopping the service sets both fans to full.
+Speed follows the hottest disk. Full speed, and status "hot" (which lights the
+red System LED and beeps via n7510-leds), when the CPU, an IT8728 board sensor
+or a disk passes its limit; Thecus OS itself went to full speed above 60 °C on
+the board sensors. Any read error, a stalled fan, or stopping the service also
+sets both fans to full.
 """
 import glob, os, signal, sys, time
 
 PWMS = {"pwm1": "fan1_input", "pwm3": "fan3_input"}
 DISK_LOW, DISK_HIGH = 35.0, 45.0      # °C: minimum speed below, full speed above
-CPU_FULL = 70.0                        # °C: full speed at or above
+DISK_HOT = 50.0                        # °C: any disk at or above is an alarm
+CPU_FULL = 70.0                        # °C: full speed and alarm at or above
+BOARD_FULL = 60.0                      # °C: IT8728 thermal sensors, full speed and alarm
 PWM_MIN, PWM_MAX = 100, 255
 INTERVAL = 10
 FAN_MODE_FILE = "/run/n7510/fan-mode"
@@ -55,8 +60,27 @@ def cpu_temp():
     return max(read_int(p) / 1000 for p in glob.glob(f"{h}/temp*_input"))
 
 
+def board_temp(it):
+    """Hottest IT8728 thermal sensor; readings outside 0-120 °C are ignored."""
+    vals = []
+    for p in glob.glob(f"{it}/temp*_input"):
+        try:
+            t = read_int(p) / 1000
+        except OSError:
+            continue
+        if 0 < t < 120:
+            vals.append(t)
+    return max(vals) if vals else float("nan")
+
+
+def decide(disk, cpu, board):
+    """Return (pwm, hot) for the hottest disk, CPU and board temperatures."""
+    hot = cpu >= CPU_FULL or board >= BOARD_FULL or disk >= DISK_HOT
+    return (PWM_MAX if hot else curve(disk, cpu)), hot
+
+
 def write_status(status):
-    # Read by n7510-trayled to light the red System LED: "ok", "stall" or "read-error".
+    # Read by n7510-leds to light the red System LED: "ok", "hot", "stall" or "read-error".
     os.makedirs(os.path.dirname(STATUS_FILE), exist_ok=True)
     with open(STATUS_FILE + ".tmp", "w") as f:
         f.write(status + "\n")
@@ -99,13 +123,16 @@ def main():
     last = None
     stalled_since = {}
     while True:
+        hot = False
+        board = float("nan")
         try:
             disks = disk_temps()
             if not disks:
                 raise RuntimeError("no disk temperatures")
             hottest = max(disks.values())
             cpu = cpu_temp()
-            target = curve(hottest, cpu)
+            board = board_temp(it)
+            target, hot = decide(hottest, cpu, board)
             if fan_mode() == "full":
                 target = PWM_MAX
             for p, tach in PWMS.items():
@@ -122,11 +149,16 @@ def main():
             hottest = cpu = float("nan")
             print(f"read error ({e}), full speed", flush=True)
         set_all(it, target)
-        status = "read-error" if hottest != hottest else ("stall" if any(
-            time.time() - t > 30 for t in stalled_since.values()) else "ok")
+        if hottest != hottest:
+            status = "read-error"
+        elif any(time.time() - t > 30 for t in stalled_since.values()):
+            status = "stall"
+        else:
+            status = "hot" if hot else "ok"
         write_status(status)
         if target != last:
-            print(f"disk max {hottest:.0f}C cpu {cpu:.0f}C -> pwm {target}", flush=True)
+            print(f"disk max {hottest:.0f}C cpu {cpu:.0f}C board {board:.0f}C -> pwm {target}"
+                  f"{' (hot)' if hot else ''}", flush=True)
             last = target
         time.sleep(INTERVAL)
 
