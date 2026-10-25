@@ -117,10 +117,32 @@ With the hook in place:
 - **Wake-on-LAN:** works from power-off on the WAN/LAN1 port (82574L,
   `Supports Wake-on: pumbg`) with magic-packet mode (`wol g`). Thecus OS set
   the same with `ethtool -s eth0 wol g`.
-- **Power after AC loss:** a BIOS setting only; Thecus OS does not control it
-  on this model (`sys_ac` exits because `eup=0`).
-- **Scheduled power-on:** Thecus used an RTC wake alarm; the kernel reports
-  `RTC can wake from S4`. Untested with `rtcwake`.
+- **Power after AC loss:** BIOS *SIO Configuration → Super IO Device Config →
+  PWRON After PWR-Fail*, set by the IT8728, default *Former-Sts* (back to the
+  state before the cut). The ICH10's own `AFTERG3_EN` reads 0. Thecus OS does
+  not change it on this model (`sys_ac` exits because `eup=0`).
+- **Scheduled power-on:** tested with `rtcwake -m no -s 120` followed by a
+  power-off; the board started on time. The BIOS's *Advanced → Power
+  Management → Resume by Alarm* (a fixed BIOS wake time) can stay Disabled.
+
+## BIOS
+
+Phoenix SecureCore Tiano `CDV_T30 X64`, built 2012-09-17. Settings seen on
+this unit, all left at their defaults:
+
+| Menu | Setting | Value / note |
+|---|---|---|
+| Main → Boot Features | UEFI Boot, Legacy Boot | both Enabled |
+| Main → Boot Features | Console Redirection | Disabled. Keep it so: COM1 (`ttyS0`) is the LCD panel |
+| Advanced → Serial ATA | Controller mode | AHCI. The DOM is on ICH10 port 0, five trays on ICH10 ports 1–5, two trays on a SiI 3132 (`04:00.0`); setup lists ports 1–5 as "Not Installed" anyway |
+| Advanced → South Bridge | SMBus | Enabled (needed for the PCA9532 LED chips) |
+| Advanced → Power Management | Resume by LAN / by Alarm | Enabled / Disabled |
+| SIO Configuration | Serial ports 1 / 2 | `3F8` IRQ 4 / `2F8` IRQ 3, both enabled |
+| SIO Configuration | Watch Dog Timer Select | Disabled (the IT8728 watchdog; Linux driver `it87_wdt`) |
+| SIO Configuration | PWRON After PWR-Fail | Former-Sts |
+| SIO Configuration → Hardware Monitor | Smart Fan Control | BIOS fan curve, used until `n7510-fan` takes over |
+| Security | Supervisor / user / HDD passwords | none set; TPM not detected |
+| Boot | Priority | the OS's UEFI entry, then USB, then the DOM (`UDinfo MDS 1GB`) |
 
 ## Thecus fan logic, for reference
 

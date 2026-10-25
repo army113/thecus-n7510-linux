@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3 (2026-10-25)
+
+- Tested: scheduled power-on with `rtcwake` from power-off.
+- Documented the BIOS settings (`docs/hardware.md`), including power after
+  AC loss (*PWRON After PWR-Fail*, default *Former-Sts*) and why Console
+  Redirection must stay off (COM1 is the LCD).
+
 ## 0.1.2 (2026-10-25)
 
 - `n7510-fan`: overheat alarm. Full speed and status `hot` (red System "!"

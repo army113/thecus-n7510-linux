@@ -59,7 +59,7 @@ The default LCD password is `0000`.
 
 ## Status and limitations
 
-Version 0.1.2. Built and tested on **one** N7510 (board ID 6, LCD MCU
+Version 0.1.3. Built and tested on **one** N7510 (board ID 6, LCD MCU
 firmware `01.04.00`) running openmediavault 6 / Debian 11, kernel 6.0.
 
 | Area | Status |
@@ -68,7 +68,7 @@ firmware `01.04.00`) running openmediavault 6 / Debian 11, kernel 6.0.
 | Power off actually cutting power (`n7510-poweroff` hook, see below) | tested |
 | Power button (short press: clean shutdown and power off) | tested; on openmediavault set *System → Power Management → Power button* to **Shutdown** (its default, Standby, suspends) |
 | Wake-on-LAN from power-off | tested (magic packet; enable with `ethtool -s <nic> wol g`, OMV's interface setting, or systemd `WakeOnLan=magic`) |
-| Scheduled power-on (RTC wake alarm, `rtcwake`) | not tested |
+| Scheduled power-on (RTC wake alarm, `rtcwake`) | tested (`rtcwake -m no -s 120`, then power off; works with the BIOS's own "Resume by Alarm" left Disabled) |
 | Overheat alarm (board sensors ≥ 60 °C, CPU ≥ 70 °C, disk ≥ 50 °C: full fans, red "!", beeps) | logic tested, not triggered by real heat |
 | Tray LEDs (red/green), System "!" red + beeps, USB LED | tested, including a real disk dropping out of a tray |
 | System "!" orange during RAID resync/check | tested (RAID check) |
