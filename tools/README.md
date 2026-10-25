@@ -5,6 +5,7 @@ Helpers used to map the hardware. Run them as root on the NAS.
 | File | Purpose | Safety |
 |---|---|---|
 | `beep.py [hz] [s]` | PC-speaker tone | safe |
+| `acpi-s5-info.py` | show the ACPI S5 sleep type, PM1 registers and SMI_EN (power-off diagnosis) | read-only |
 | `gpio-dump.py [pins]` | read ICH10 GPIO configuration | read-only |
 | `gpio-pin.py <pin> low\|high\|restore\|show` | set or restore one ICH10 GPIO pin (original state saved) | changes hardware; one pin at a time |
 | `gpio-led-test.py HH:MM:SS [pins]` | timed low/high test of ICH10 GPIO pins; start it with `setsid nohup` on its own | changes hardware; restores each pin |

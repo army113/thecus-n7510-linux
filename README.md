@@ -43,7 +43,8 @@ sudo ./install.sh
 
 The installer copies the daemons to `/opt/n7510/`, sets the `it87` option
 `fix_pwm_polarity=1`, autoloads `it87`, `drivetemp`, `i2c-i801`, `i2c-dev`
-and `pcspkr`, and enables `n7510-fan`, `n7510-lcd` and `n7510-leds`. On
+and `pcspkr`, enables `n7510-fan`, `n7510-lcd` and `n7510-leds`, and adds
+the `n7510-poweroff` shutdown hook so power off really switches the box off. On
 openmediavault it also installs a small fix that keeps the systemd journal
 working under folder2ram. `sudo ./uninstall.sh` removes everything.
 
@@ -58,25 +59,34 @@ The default LCD password is `0000`.
 
 ## Status and limitations
 
-Version 0.1.0. Built and tested on **one** N7510 (board ID 6, LCD MCU
+Version 0.1.1. Built and tested on **one** N7510 (board ID 6, LCD MCU
 firmware `01.04.00`) running openmediavault 6 / Debian 11, kernel 6.0.
 
 | Area | Status |
 |---|---|
-| Fans, LCD pages, password entry, fan-mode menu, change password, reboot from the panel | tested |
-| Power off from the panel | implemented, not tested |
+| Fans, LCD pages, password entry, fan-mode menu, change password, reboot and power off from the panel | tested |
+| Power off actually cutting power (`n7510-poweroff` hook, see below) | tested |
 | Tray LEDs (red/green), System "!" red + beeps, USB LED | tested, including a real disk dropping out of a tray |
-| System "!" orange during RAID resync/check | implemented, not seen live |
+| System "!" orange during RAID resync/check | tested (RAID check) |
 | eSATA LED | not controllable from software as far as we can tell; probably lit by the eSATA controller itself (unconfirmed, no eSATA device to test) |
 | USB Copy on the panel | answered with "USB Copy N/A"; copying is not implemented |
 | Other Thecus models | untested; the pin map may differ |
 
 Known limitations:
 
+- **Power off needs a fix on this board.** Without it, `poweroff` ends at
+  `reboot: Power down` and the box stays on: the BIOS traps the ACPI S5 write
+  into SMM (`SLP_SMI_EN`), and its handler fails on a missing TPM method
+  (`\_SB.PCI0.LPCB.TPM.PTS`, `AE_NOT_FOUND`). The installer adds a systemd
+  `system-shutdown` hook, `n7510-poweroff`, that clears `SLP_SMI_EN` as the
+  last step of a power-off, so the kernel's normal S5 write reaches the
+  hardware. It does nothing on reboot or halt, or on other boards.
 - The green LEDs of trays 1–5 need either the kernel's `gpio_ich` driver
-  (with `acpi_enforce_resources=lax`) or `/dev/port`. Kernel lockdown, as
-  enabled by Secure Boot on many distributions, blocks `/dev/port`; without
-  `gpio_ich` those five LEDs then stay dark. Everything else is unaffected.
+  (with `acpi_enforce_resources=lax`) or `/dev/port`, and the power-off hook
+  needs `/dev/port`. Kernel lockdown, as enabled by Secure Boot on many
+  distributions, blocks `/dev/port`: then, without `gpio_ich`, those five LEDs
+  stay dark, and power off halts without cutting power (hold the power button).
+  Everything else is unaffected.
 - The default LCD password is `0000`. Change it from the panel menu.
 - Disks are matched to trays by serial number on first start
   (`/etc/n7510/tray-map.json`). After moving disks between trays, delete that

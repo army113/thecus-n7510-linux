@@ -88,6 +88,26 @@ writes work, not raw I²C writes.
 | Buttons | handled inside the LCD MCU, see [LCD protocol](lcd-protocol.md) |
 | ICH10 GPIO 9, 27, 28, 34, 49 | configured by Thecus/the BIOS, no visible function found; leave as is |
 
+## Power off
+
+`poweroff` halts the system but leaves the board powered: the kernel prints
+`reboot: Power down` after ACPI errors from `\_PTS` (`Could not resolve
+symbol [\_SB.PCI0.LPCB.TPM.PTS], AE_NOT_FOUND`).
+
+| Register (ICH10, PM base `0x400` from the FADT) | Value |
+|---|---|
+| `\_S5_` sleep type (DSDT) | SLP_TYPa = 7 (standard) |
+| PM1a_CNT | `0x404` |
+| SMI_EN (`PM base + 0x30`) | `0x33`: GBL_SMI_EN = 1, **SLP_SMI_EN = 1** |
+
+With SLP_SMI_EN set, the chipset hands the S5 write to the BIOS's SMM
+handler, which fails, so the power is never cut. Thecus OS simply calls
+`/sbin/poweroff` (its old 3.10 kernel presumably got past `\_PTS`).
+`src/n7510-poweroff`, a systemd `system-shutdown` hook, clears SLP_SMI_EN
+right before power-off; the kernel's own sequence (flushing disk caches, then
+S5) then switches the board off. Verified on the N7510; reboot and halt are
+not affected. `tools/acpi-s5-info.py` shows these values read-only.
+
 ## openmediavault notes
 
 - folder2ram mounts `/var/log` after journald starts, so the journal silently

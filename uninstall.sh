@@ -7,7 +7,8 @@ systemctl disable --now n7510-fan.service n7510-lcd.service n7510-leds.service 2
 rm -f /etc/systemd/system/n7510-fan.service /etc/systemd/system/n7510-lcd.service \
       /etc/systemd/system/n7510-leds.service \
       /etc/systemd/system/folder2ram_startup.service.d/journald.conf \
-      /etc/modprobe.d/n7510.conf /etc/modules-load.d/n7510.conf
+      /etc/modprobe.d/n7510.conf /etc/modules-load.d/n7510.conf \
+      /usr/lib/systemd/system-shutdown/n7510-poweroff /lib/systemd/system-shutdown/n7510-poweroff
 rm -rf /opt/n7510
 [ "${1:-}" = --purge ] && rm -rf /etc/n7510 /run/n7510
 systemctl daemon-reload

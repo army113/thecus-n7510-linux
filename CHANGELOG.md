@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.1 (2026-10-25)
+
+- Power off now switches the board off. New systemd `system-shutdown` hook
+  `n7510-poweroff` clears the ICH10 `SLP_SMI_EN` bit before power-off, so the
+  BIOS's failing SMM handler no longer swallows the ACPI S5 request. Installed
+  and removed by `install.sh` / `uninstall.sh`.
+- New read-only tool `tools/acpi-s5-info.py`.
+- Tested: power off and the orange System "!" during a RAID check.
+
 ## 0.1.0 (2026-10-25)
 
 First release, tested on one Thecus N7510 under openmediavault 6.

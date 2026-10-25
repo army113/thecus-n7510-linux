@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+"""systemd system-shutdown hook: make "power off" actually cut power on the N7510.
+
+The BIOS sets SLP_SMI_EN in the ICH10 SMI_EN register, so the kernel's ACPI S5
+write is trapped into SMM, where the BIOS handler fails (the DSDT's \\_PTS calls
+a TPM method that does not exist) and the board stays on after
+"reboot: Power down". Clearing SLP_SMI_EN just before power-off lets the
+kernel's normal S5 write reach the hardware. Reboot and halt are untouched.
+
+systemd runs this as the last step, after unmounting, with $1 = poweroff,
+reboot, halt or kexec. Needs /dev/port (no kernel lockdown).
+"""
+import os, struct, sys
+
+PM_BASE_FALLBACK = 0x400      # ICH10 ACPI I/O base on this board (PM1a_EVT_BLK)
+SMI_EN_OFFSET = 0x30
+SLP_SMI_EN = 1 << 4
+
+if len(sys.argv) < 2 or sys.argv[1] != "poweroff":
+    sys.exit(0)
+try:
+    if "Granite Well" not in open("/sys/class/dmi/id/board_name").read():
+        sys.exit(0)
+except OSError:
+    sys.exit(0)
+
+try:
+    fadt = open("/sys/firmware/acpi/tables/FACP", "rb").read()
+    pm_base = struct.unpack_from("<I", fadt, 56)[0] or PM_BASE_FALLBACK   # PM1a_EVT_BLK
+except OSError:
+    pm_base = PM_BASE_FALLBACK
+
+try:
+    fd = os.open("/dev/port", os.O_RDWR)
+    os.lseek(fd, pm_base + SMI_EN_OFFSET, 0)
+    smi_en = struct.unpack("<I", os.read(fd, 4))[0]
+    if smi_en & SLP_SMI_EN:
+        os.lseek(fd, pm_base + SMI_EN_OFFSET, 0)
+        os.write(fd, struct.pack("<I", smi_en & ~SLP_SMI_EN))
+    os.close(fd)
+except OSError as e:
+    print(f"n7510-poweroff: cannot clear SLP_SMI_EN: {e}", file=sys.stderr)

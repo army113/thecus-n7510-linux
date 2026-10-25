@@ -36,6 +36,12 @@ it87_has_pwm || { modprobe -r it87; modprobe it87; }
 it87_has_pwm || echo "warning: it87 still exposes no PWM controls" >&2
 
 install -m 644 systemd/n7510-fan.service systemd/n7510-lcd.service systemd/n7510-leds.service /etc/systemd/system/
+
+# Power-off fix: systemd-shutdown runs hooks from one of these, depending on
+# whether /usr is merged; install into each directory that exists.
+for d in /usr/lib/systemd/system-shutdown /lib/systemd/system-shutdown; do
+  [ -d "$d" ] && install -m 755 src/n7510-poweroff "$d/n7510-poweroff"
+done
 if systemctl list-unit-files folder2ram_startup.service >/dev/null 2>&1 && \
    systemctl cat folder2ram_startup.service >/dev/null 2>&1; then
   install -d /etc/systemd/system/folder2ram_startup.service.d
