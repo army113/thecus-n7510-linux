@@ -60,7 +60,9 @@ The default LCD password is `0000`.
 ## Status and limitations
 
 Version 0.1.3. Built and tested on **one** N7510 (board ID 6, LCD MCU
-firmware `01.04.00`) running openmediavault 6 / Debian 11, kernel 6.0.
+firmware `01.04.00`), first on openmediavault 6 / Debian 11 (kernel 6.0),
+then on a fresh openmediavault 8 / Debian 13 (kernel 7.2 from backports, 6.12
+also booted), where `install.sh` ran unchanged.
 
 | Area | Status |
 |---|---|

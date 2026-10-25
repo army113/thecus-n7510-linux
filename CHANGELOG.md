@@ -4,6 +4,9 @@
 
 - Documented the ICH10 hardware watchdog (`iTCO_wdt`, tested) and how to use
   it instead of openmediavault's `softdog`.
+- Tested on openmediavault 8 / Debian 13 (kernels 6.12 and 7.2): `install.sh`
+  unchanged, all three services start; Debian 13 has no `gpio_ich`, so
+  `n7510-leds` drives the green LEDs through `/dev/port`.
 
 ## 0.1.3 (2026-10-25)
 
