@@ -4,18 +4,18 @@ Front-panel LCD, buttons, fans, LEDs and beeper for the **Thecus N7510**
 (7-bay, Intel Atom D2701, "Granite Well" board) running any current Linux
 distribution instead of the end-of-life Thecus OS.
 
-<img src="docs/images/n7510-front.jpg" alt="Thecus N7510 front panel with trays 1 to 7 numbered and the LCD showing RAID md0 clean" width="360" align="right">
-
-The status LEDs run down the left edge: power, System "!", LAN1, LAN2, USB,
-eSATA. Trays are numbered 1–7 from the top; the LCD and its four buttons sit
-at the bottom.
-
 Thecus stopped updating these boxes years ago. The hardware is a plain x86 PC,
 so it runs Debian, openmediavault, Ubuntu, Fedora and others fine, but out of
 the box the LCD sits on its boot animation, the buttons do nothing, the fans
 run at fixed BIOS speeds and none of the tray or status LEDs work. This
 repository fixes that with three small daemons that use only the Python 3
 standard library and mainline kernel drivers.
+
+<p align="center">
+  <img src="docs/images/n7510-front.jpg" alt="Thecus N7510 front panel with trays 1 to 7 numbered and the LCD showing RAID md0 clean" width="320"><br>
+  <sub>Status LEDs down the left edge (power, System "!", LAN1, LAN2, USB, eSATA),
+  trays 1–7 from the top, LCD and buttons at the bottom.</sub>
+</p>
 
 | Feature | Without this | With this |
 |---|---|---|
